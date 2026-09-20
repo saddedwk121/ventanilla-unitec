@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-19T00:00:00Z",
+  "title": "Design System: La Costeña Centro de Control Financiero",
+  "extensions": {
+    "colorMeta": {
+      "signal-blue": { "role": "primary", "displayName": "Signal Blue", "canonical": "#0071E3", "tonalRamp": ["#001B36", "#00366D", "#0058B0", "#0071E3", "#409CFF", "#7CBBFF", "#B8DAFF", "#E8F1FD"] },
+      "confirmed-green": { "role": "success", "displayName": "Confirmed Green", "canonical": "#1D8A45", "tonalRamp": ["#0A2E15", "#0F4B22", "#156C31", "#1D8A45", "#30D158", "#6FE092", "#B4EFC5", "#E7F6EC"] },
+      "attention-amber": { "role": "warning", "displayName": "Attention Amber", "canonical": "#B5680A", "tonalRamp": ["#3D2103", "#5C3205", "#8A4A08", "#B5680A", "#FF9F0A", "#FFBD5C", "#FFDBA3", "#FCF1DF"] },
+      "alert-red": { "role": "danger", "displayName": "Alert Red", "canonical": "#D6362A", "tonalRamp": ["#3D0D0A", "#5C1410", "#8A1F19", "#D6362A", "#FF453A", "#FF8A82", "#FFC2BC", "#FBEAE9"] },
+      "fog-bg": { "role": "neutral-bg", "displayName": "Fog", "canonical": "#F5F5F7", "tonalRamp": ["#000000", "#1C1C1E", "#3A3A3C", "#6E6E73", "#86868B", "#AEAEB2", "#E8E8ED", "#F5F5F7"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Títulos de vista (#topbar h1), 7 vistas de la app." },
+      "kpi-value": { "displayName": "KPI Value", "purpose": "Número principal de cada tarjeta ejecutiva (.kc-val)." },
+      "label": { "displayName": "Label", "purpose": "Eyebrows uppercase, encabezados de tabla, grupos de nav." }
+    },
+    "shadows": [
+      { "name": "shadow", "value": "0 1px 2px rgba(0,0,0,.04), 0 10px 22px -16px rgba(0,0,0,.14)", "purpose": "Panel/tarjeta en reposo." },
+      { "name": "shadow-hover", "value": "0 4px 10px rgba(0,0,0,.05), 0 22px 44px -20px rgba(0,0,0,.18)", "purpose": "Hover de panel/tarjeta." },
+      { "name": "shadow-hero", "value": "0 2px 6px rgba(0,0,0,.04), 0 30px 64px -30px rgba(0,0,0,.16)", "purpose": "Tarjetas hero de Inteligencia de Mercado." }
+    ],
+    "motion": [
+      { "name": "ease", "value": "cubic-bezier(.22,.85,.32,1)", "purpose": "Easing por defecto para transiciones de estado (hover, color, transform)." },
+      { "name": "ease-spring", "value": "cubic-bezier(.26,1.34,.44,1)", "purpose": "Reservado para micro-interacciones con rebote leve (actualmente sin uso tras quitar el rebote excesivo del rediseño)." },
+      { "name": "dur-fast", "value": "180ms", "purpose": "Hover de botones/inputs." },
+      { "name": "dur-normal", "value": "320ms", "purpose": "Cambios de panel, filtros, tema." },
+      { "name": "dur-slow", "value": "520ms", "purpose": "Entrada de vista (viewIn), reveal en cascada." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "560px" },
+      { "name": "tablet", "value": "900px" },
+      { "name": "panel-stack", "value": "1400px" },
+      { "name": "kpi-2col", "value": "1200px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "KPI Card",
+      "kind": "card",
+      "refersTo": "kpi-card",
+      "description": "Tarjeta ejecutiva plana con eyebrow, valor grande, sparkline y comparativo YoY. Sin borde de acento decorativo.",
+      "html": "<div class=\"ds-kpi-card\"><div class=\"ds-kpi-top\"><span class=\"ds-kpi-eyebrow\">UTILIDAD BRUTA</span><span class=\"ds-kpi-chip\">↗</span></div><div class=\"ds-kpi-val\">$6,229m</div><div class=\"ds-kpi-yoy\">vs. 2025: <b>$6,702m</b> · <span class=\"ds-neg\">↓ -7.1%</span></div></div>",
+      "css": ".ds-kpi-card{background:#FFFFFF;border:1px solid rgba(0,0,0,.08);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s cubic-bezier(.22,1,.36,1);} .ds-kpi-card:hover{box-shadow:0 4px 10px rgba(0,0,0,.05), 0 22px 44px -20px rgba(0,0,0,.18);transform:translateY(-2px);} .ds-kpi-top{display:flex;justify-content:space-between;align-items:flex-start;} .ds-kpi-eyebrow{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#6B7280;} .ds-kpi-chip{width:32px;height:32px;border-radius:10px;background:#E7F6EC;color:#1D8A45;display:flex;align-items:center;justify-content:center;font-size:14px;} .ds-kpi-val{font-size:30px;font-weight:650;letter-spacing:-.015em;color:#1D1D1F;} .ds-kpi-yoy{font-size:13px;color:#6E6E73;} .ds-neg{color:#D6362A;font-weight:750;}"
+    },
+    {
+      "name": "Custom Select Panel",
+      "kind": "custom",
+      "refersTo": "select-panel",
+      "description": "Reemplazo del listbox nativo del navegador para todo <select> del sistema. Panel flotante con checkmark en el elemento activo.",
+      "html": "<div class=\"ds-fsp\"><div class=\"ds-fsp-row ds-sel\"><span>Todos</span><svg class=\"ds-check\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\"><path d=\"M20 6L9 17l-5-5\"/></svg></div><div class=\"ds-fsp-row\"><span>Nacional</span></div><div class=\"ds-fsp-row\"><span>Exportación</span></div></div>",
+      "css": ".ds-fsp{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:6px;box-shadow:0 20px 44px -14px rgba(0,0,0,.22);font-family:-apple-system,sans-serif;width:220px;} .ds-fsp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;font-size:12.5px;font-weight:550;color:#6E6E73;cursor:pointer;} .ds-fsp-row:hover{background:#F5F5F7;} .ds-fsp-row.ds-sel{color:#0071E3;font-weight:700;background:#E8F1FD;} .ds-check{width:14px;height:14px;color:#0071E3;}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA principal del drawer de detalle y formularios.",
+      "html": "<button class=\"ds-btn-primary\">Ver análisis completo</button>",
+      "css": ".ds-btn-primary{width:100%;font-size:13px;font-weight:700;color:#fff;background:#0071E3;border:none;border-radius:11px;padding:11px 16px;cursor:pointer;font-family:-apple-system,sans-serif;transition:background .18s ease, transform .15s ease;} .ds-btn-primary:hover{background:#0058B0;transform:translateY(-1px);} .ds-btn-primary:focus-visible{outline:2px solid #0071E3;outline-offset:2px;}"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Ítem de sidebar con pill de fondo deslizante para el estado activo, sin barra lateral de acento.",
+      "html": "<button class=\"ds-navitem ds-active\"><svg class=\"ds-ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg><span>Centro de Control</span></button>",
+      "css": ".ds-navitem{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:12px;border:none;background:transparent;color:#6E6E73;font-size:13px;font-weight:590;cursor:pointer;width:100%;text-align:left;font-family:-apple-system,sans-serif;} .ds-navitem:hover{background:#F5F5F7;color:#1D1D1F;} .ds-navitem.ds-active{color:#0058B0;background:#E8F1FD;} .ds-ic{width:18px;height:18px;flex:0 0 auto;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Control Room",
+    "overview": "Este es un instrumento de decisión financiera, no una vitrina. El sistema se inspira directamente en el lenguaje visual de Apple: superficies planas, un único acento de color con autoridad, tipografía del sistema, y cero decoración que compita con el número que el director financiero necesita leer en dos segundos. Nació como el rediseño completo de un dashboard genérico hacia un sistema unificado de un solo azul de sistema y grises neutros.",
+    "keyCharacteristics": [
+      "Un solo acento de color (azul de sistema); todo lo demás es escala de grises.",
+      "Tarjetas planas sin bordes de color ni barras decorativas.",
+      "Selects nunca usan el picker nativo del navegador; siempre un panel propio.",
+      "Modo oscuro es ciudadano de primera clase: negro puro #000000 con superficies #1C1C1E."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Signal Blue es el único color usado para interacción/marca. Verde/ámbar/rojo comunican estado del dato, nunca interacción genérica.", "section": "colors" },
+      { "name": "The No Rainbow Cards Rule", "body": "Ninguna tarjeta lleva una barra o borde de color decorativo por tipo de métrica; el color vive solo en el chip de ícono.", "section": "colors" },
+      { "name": "The System-Only Rule", "body": "Ninguna fuente se carga por red; el archivo resuelve siempre a la pila tipográfica nativa del sistema operativo.", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "Las tarjetas usan borde de 1px como separación primaria; la sombra es ambiental y reservada para superficies realmente elevadas (drawer, modal, panel de select).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar Signal Blue como único acento interactivo en toda la app.",
+      "Do usar el panel de select propio para cualquier <select> nuevo.",
+      "Do mantener el tema oscuro probado en cada cambio visual.",
+      "Do usar iconos SVG inline de trazo simple (stroke-width 1.7-2)."
+    ],
+    "donts": [
+      "Don't agregar una segunda barra o borde de color decorativo a las tarjetas KPI.",
+      "Don't usar gradientes multicolor en gráficas o UI.",
+      "Don't cargar fuentes por red.",
+      "Don't dejar que un <select> abra su listbox nativo del sistema operativo."
+    ]
+  }
+}
