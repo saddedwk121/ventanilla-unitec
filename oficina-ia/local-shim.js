@@ -107,6 +107,15 @@
     },
   };
 
-  const caps = { sample, downloads, db };
+  const assets = {
+    async upload(blob) {
+      const res = await fetch('/api/blob', { method: 'POST', headers: { 'content-type': blob.type || 'application/octet-stream' }, body: blob });
+      if (!res.ok) throw Object.assign(new Error(await res.text()), { code: 'upstream_error' });
+      const { id } = await res.json();
+      return { id, url: '/_blob/' + id, sizeBytes: blob.size, contentType: blob.type };
+    },
+  };
+
+  const caps = { sample, downloads, db, assets };
   window.claude = { use: async name => caps[name] || null };
 })();

@@ -11,6 +11,7 @@ const API_KEY = process.env.IA_API_KEY || '';
 const MODEL = process.env.IA_MODEL || 'claude-sonnet-5';
 const MAX_TOKENS = +process.env.IA_MAX_TOKENS || 16000;
 const DB_FILE = path.join(__dirname, 'datos', 'historial.json');
+const BLOB_DIR = path.join(__dirname, 'datos', 'archivos');
 
 function loadEnv(file) {
   if (!fs.existsSync(file)) return;
@@ -107,6 +108,23 @@ const server = http.createServer(async (req, res) => {
       const send = o => res.write(JSON.stringify(o) + '\n');
       try { await sample(body, send); } catch (e) { send({ t: 'error', message: e.message }); }
       return res.end();
+    }
+    if (req.method === 'POST' && url.pathname === '/api/blob') {
+      const chunks = [];
+      for await (const c of req) chunks.push(c);
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      fs.mkdirSync(BLOB_DIR, { recursive: true });
+      fs.writeFileSync(path.join(BLOB_DIR, id), Buffer.concat(chunks));
+      fs.writeFileSync(path.join(BLOB_DIR, id + '.type'), req.headers['content-type'] || 'application/octet-stream');
+      res.writeHead(200, { 'content-type': 'application/json' });
+      return res.end(JSON.stringify({ id }));
+    }
+    const blob = url.pathname.match(/^\/_blob\/([a-z0-9]+)$/);
+    if (req.method === 'GET' && blob) {
+      const f = path.join(BLOB_DIR, blob[1]);
+      if (!fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { 'content-type': fs.readFileSync(f + '.type', 'utf8') });
+      return fs.createReadStream(f).pipe(res);
     }
     const m = url.pathname.match(/^\/api\/db\/([\w.-]+)$/);
     if (m) {
