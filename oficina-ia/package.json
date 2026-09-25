@@ -1,0 +1,8 @@
+{
+  "name": "oficina-ia",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Oficina de agentes IA local: ejecutan tareas en tiempo real y envían el resultado por correo.",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "nodemailer": "^7.0.0" }
+}
