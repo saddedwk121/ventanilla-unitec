@@ -13,7 +13,5 @@ services:
     envVars:
       - key: IA_API_KEY
         sync: false
-      - key: APP_PASSWORD
+      - key: APP_USERS
         sync: false
-      - key: APP_USER
-        value: oficina

@@ -94,16 +94,29 @@ function page() {
 }
 
 // Protege la oficina con usuario y contraseña cuando está publicada en internet.
-function authorized(req) {
-  if (!APP_PASSWORD) return true;
+// Cuentas permitidas: APP_USERS="jose:clave1,ana:clave2" (o APP_USER + APP_PASSWORD para una sola).
+const ACCOUNTS = new Map(
+  (process.env.APP_USERS || (APP_PASSWORD ? `${APP_USER}:${APP_PASSWORD}` : ''))
+    .split(',').map(x => x.trim()).filter(Boolean)
+    .map(x => { const i = x.indexOf(':'); return [x.slice(0, i).trim(), x.slice(i + 1)]; })
+);
+const crypto = require('crypto');
+const same = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && crypto.timingSafeEqual(x, y); };
+
+// Devuelve el usuario autenticado, 'local' si no hay cuentas configuradas, o null si no tiene acceso.
+function authUser(req) {
+  if (!ACCOUNTS.size) return 'local';
   const m = (req.headers.authorization || '').match(/^Basic (.+)$/);
-  if (!m) return false;
-  const [user, ...rest] = Buffer.from(m[1], 'base64').toString('utf8').split(':');
-  return user === APP_USER && rest.join(':') === APP_PASSWORD;
+  if (!m) return null;
+  const raw = Buffer.from(m[1], 'base64').toString('utf8');
+  const i = raw.indexOf(':');
+  const user = raw.slice(0, i), pass = raw.slice(i + 1);
+  return ACCOUNTS.has(user) && same(ACCOUNTS.get(user), pass) ? user : null;
 }
 
 const server = http.createServer(async (req, res) => {
-  if (!authorized(req)) {
+  const user = authUser(req);
+  if (!user) {
     res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="Oficina IA", charset="UTF-8"', 'content-type': 'text/plain; charset=utf-8' });
     return res.end('Acceso restringido');
   }
@@ -131,20 +144,22 @@ const server = http.createServer(async (req, res) => {
       fs.mkdirSync(BLOB_DIR, { recursive: true });
       fs.writeFileSync(path.join(BLOB_DIR, id), Buffer.concat(chunks));
       fs.writeFileSync(path.join(BLOB_DIR, id + '.type'), req.headers['content-type'] || 'application/octet-stream');
+      fs.writeFileSync(path.join(BLOB_DIR, id + '.owner'), user);
       res.writeHead(200, { 'content-type': 'application/json' });
       return res.end(JSON.stringify({ id }));
     }
     const blob = url.pathname.match(/^\/_blob\/([a-z0-9]+)$/);
     if (req.method === 'GET' && blob) {
       const f = path.join(BLOB_DIR, blob[1]);
-      if (!fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+      if (!fs.existsSync(f) || (fs.existsSync(f + '.owner') && fs.readFileSync(f + '.owner', 'utf8') !== user)) { res.writeHead(404); return res.end(); }
       res.writeHead(200, { 'content-type': fs.readFileSync(f + '.type', 'utf8') });
       return fs.createReadStream(f).pipe(res);
     }
     const m = url.pathname.match(/^\/api\/db\/([\w.-]+)$/);
     if (m) {
       const db = loadDb();
-      const col = db[m[1]] = db[m[1]] || {};
+      const key = user + '/' + m[1];
+      const col = db[key] = db[key] || {};
       if (req.method === 'POST') {
         const { id, data } = await readBody(req, 5e6);
         if (data === null) delete col[id]; else col[id] = data;
@@ -162,5 +177,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`\n  Oficina IA lista  →  http://localhost:${PORT}\n`);
   console.log(`  Motor IA: ${API_KEY ? 'configurado (' + MODEL + ')' : 'FALTA IA_API_KEY en .env'}`);
-  console.log(`  Acceso: ${APP_PASSWORD ? 'protegido con contraseña (usuario: ' + APP_USER + ')' : 'SIN contraseña (define APP_PASSWORD antes de publicarla en internet)'}\n`);
+  console.log(`  Acceso: ${ACCOUNTS.size ? 'privado · ' + ACCOUNTS.size + ' cuenta(s): ' + [...ACCOUNTS.keys()].join(', ') : 'SIN contraseña (define APP_USERS antes de publicarla en internet)'}\n`);
 });
