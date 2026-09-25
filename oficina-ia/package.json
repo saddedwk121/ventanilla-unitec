@@ -5,5 +5,8 @@
   "description": "Oficina de agentes IA local con visión, entregables y recomendaciones.",
   "scripts": {
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

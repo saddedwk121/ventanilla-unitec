@@ -7,6 +7,8 @@ const path = require('path');
 loadEnv(path.join(__dirname, '.env'));
 
 const PORT = +process.env.PORT || 8080;
+const APP_USER = process.env.APP_USER || 'oficina';
+const APP_PASSWORD = process.env.APP_PASSWORD || '';
 const API_KEY = process.env.IA_API_KEY || '';
 const MODEL = process.env.IA_MODEL || 'claude-sonnet-5';
 const MAX_TOKENS = +process.env.IA_MAX_TOKENS || 16000;
@@ -91,7 +93,20 @@ function page() {
   return html.replace(/<head>/i, '<head><script src="/local-shim.js"></script>');
 }
 
+// Protege la oficina con usuario y contraseña cuando está publicada en internet.
+function authorized(req) {
+  if (!APP_PASSWORD) return true;
+  const m = (req.headers.authorization || '').match(/^Basic (.+)$/);
+  if (!m) return false;
+  const [user, ...rest] = Buffer.from(m[1], 'base64').toString('utf8').split(':');
+  return user === APP_USER && rest.join(':') === APP_PASSWORD;
+}
+
 const server = http.createServer(async (req, res) => {
+  if (!authorized(req)) {
+    res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="Oficina IA", charset="UTF-8"', 'content-type': 'text/plain; charset=utf-8' });
+    return res.end('Acceso restringido');
+  }
   try {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/') {
@@ -146,5 +161,6 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`\n  Oficina IA lista  →  http://localhost:${PORT}\n`);
-  console.log(`  Motor IA: ${API_KEY ? 'configurado (' + MODEL + ')' : 'FALTA IA_API_KEY en .env'}\n`);
+  console.log(`  Motor IA: ${API_KEY ? 'configurado (' + MODEL + ')' : 'FALTA IA_API_KEY en .env'}`);
+  console.log(`  Acceso: ${APP_PASSWORD ? 'protegido con contraseña (usuario: ' + APP_USER + ')' : 'SIN contraseña (define APP_PASSWORD antes de publicarla en internet)'}\n`);
 });

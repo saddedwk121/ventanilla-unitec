@@ -1,0 +1,19 @@
+# Configuración para publicar Oficina IA en Render (render.com).
+# Cada vez que se suben cambios a la rama, Render vuelve a publicar la página sola.
+services:
+  - type: web
+    name: oficina-ia
+    runtime: node
+    rootDir: oficina-ia
+    branch: claude/sharp-mendel-kc771y
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: IA_API_KEY
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: APP_USER
+        value: oficina
